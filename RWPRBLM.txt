@@ -1,0 +1,51 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+std::mutex mtx;
+int sharedResource = 0;
+void reader()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    std::cout << "Reader reads: " << sharedResource << std::endl;
+}
+void writer(int value)
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    sharedResource = value;
+    std::cout << "Writer writes: " << sharedResource << std::endl;
+}
+int main()
+{
+    int choice, value;
+    while (true)
+    {
+        std::cout << "1. Read\n";
+        std::cout << "2. Write\n";
+        std::cout << "3. Quit\n";
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+        switch (choice)
+        {
+        case 1:
+        {
+            std::thread readerThread(reader);
+            readerThread.join();
+            break;
+        }
+        case 2:
+        {
+            std::cout << "Enter a value to write: ";
+            std::cin >> value;
+            std::thread writerThread(writer, value);
+            writerThread.join();
+            break;
+        }
+        case 3:
+            std::cout << "Quitting...\n";
+            return 0;
+        default:
+            std::cout << "Invalid choice. Please try again.\n";
+        }
+    }
+    return 0;
+}
